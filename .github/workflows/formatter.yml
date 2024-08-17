@@ -16,6 +16,10 @@ on:
 permissions:
   contents: write
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BRANCH_NAME: formatting
+
 jobs:
   format:
     runs-on: ubuntu-latest
@@ -55,4 +59,11 @@ jobs:
         run: |
           git add .
           git commit -m "style: format scripts" || true
-          git push
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+
+      - name: Authenticate with GitHub CLI
+        run: gh auth login --with-token <<< $GITHUB_TOKEN
+  
+      - name: Create Pull Request
+        run: gh pr create --fill --base main --head $BRANCH_NAME || true
